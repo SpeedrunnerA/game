@@ -1,4 +1,5 @@
 from pygame import *
+import pygame
 '''Необхідні класи'''
 
 # клас-батько для спрайтів
@@ -13,8 +14,29 @@ class GameSprite(sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = player_x
         self.rect.y = player_y
-
+        # Jump Together!
+        self.jump_height = 10
+        self.is_jumping = False
+        self.jump_velocity = 0
     def reset(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+class GameSprite2(sprite.Sprite):
+    # конструктор класу
+    def __init__(self, player_image, player_x, player_y, player_speed):
+
+        # кожен спрайт повинен зберігати властивість image - зображення
+        self.image = transform.scale(image.load(player_image), (165, 65))
+        self.speed = player_speed
+        # кожен спрайт повинен зберігати властивість rect - прямокутник, в який він вписаний
+        self.rect = self.image.get_rect()
+        self.rect.x = player_x
+        self.rect.y = player_y
+        # Jump Together!
+        self.jump_height = 10
+        self.is_jumping = False
+        self.jump_velocity = 0
+    def reset2(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
 # клас-спадкоємець для спрайту-гравця (керується стрілками)
@@ -25,11 +47,26 @@ class Player(GameSprite):
             self.rect.x -= self.speed
         if keys[K_RIGHT] and self.rect.x < win_width - 80:
             self.rect.x += self.speed
-        if keys[K_UP] and self.rect.y > 5:
-            self.rect.y -= self.speed
-        if keys[K_DOWN] and self.rect.y < win_height - 80:
-            self.rect.y += self.speed
 
+        if keys[K_SPACE] and not self.is_jumping:
+            self.is_jumping = True
+            self.jump_velocity = self.jump_height
+
+        if self.is_jumping:
+            self.jump_velocity -= 0.3
+            self.rect.y -= self.jump_velocity
+            if self.jump_velocity <= 0:
+                self.is_jumping = False
+                self.jump_velocity = 0
+        if not self.is_jumping and self.rect.y < win_height - 80:
+            self.rect.y += self.speed
+        
+        if not sprite.collide_rect(self, walltexture):
+            self.rect.y += self.speed 
+        else:
+            self.rect.y = walltexture.rect.top - self.rect.height + 1
+
+        
 # клас-спадкоємець для спрайта-ворога (переміщається сам)
 class Enemy(GameSprite):
     direction = "left"
@@ -73,23 +110,17 @@ win_height = 500
 
 window = display.set_mode((win_width, win_height))
 display.set_caption("Maze")
-background = transform.scale(image.load(
-    "forest.jpg"), (win_width, win_height))
+background = transform.scale(image.load("forest.jpg"), (win_width, win_height))
+#walltexture = transform.scale(image.load("ground.jpg"), (150, 150))
 
 # Персонажі гри:
-player = Player('hero.png', 5, win_height - 80, 4)
+player = Player('hero(i).png', 5, win_height - 80, 4)
 monster = Enemy('enemy.png', win_width - 80, 280, 2)
 final = GameSprite('caveportal.png', win_width - 120, win_height - 80, 0)
+walltexture = GameSprite2('ground.jpg', 50, win_height - 80, 0)
 
-# стіни
-w1 = Wall(154, 205, 50, 100, 20, 450, 10)
-w2 = Wall(154, 205, 50, 100, 480, 350, 10)
-w3 = Wall(154, 205, 50, 100, 20, 10, 380)
-w4 = Wall(154, 205, 50, 200, 130, 10, 350)
-w5 = Wall(154, 205, 50, 450, 130, 10, 360)
-w6 = Wall(154, 205, 50, 300, 20, 10, 350)
-w7 = Wall(154, 205, 50, 390, 120, 130, 10)
 
+# Time Clock
 game = True
 finish = False
 clock = time.Clock()
@@ -111,25 +142,19 @@ while game:
 
     if finish != True:
         window.blit(background, (0, 0))
+ 
         player.update()
         monster.update()
 
         player.reset()
         monster.reset()
         final.reset()
+        walltexture.reset2()
 
-        w1.draw_wall()
-        w2.draw_wall()
-        w3.draw_wall()
-        w4.draw_wall()
-        w5.draw_wall()
-        w6.draw_wall()
-        w7.draw_wall()
 
     # Ситуація "Програш"
-    if sprite.collide_rect(player, monster) or sprite.collide_rect(player, w1) or sprite.collide_rect(player, w2) or sprite.collide_rect(player, w3):
-        finish = True
-        window.blit(lose, (200, 200))
+        #finish = True
+        #window.blit(lose, (200, 200))
 
     # Ситуація "Перемога"
     if sprite.collide_rect(player, final):
