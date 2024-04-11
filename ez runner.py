@@ -26,14 +26,14 @@ class GameSprite2(sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, player_speed):
 
         # кожен спрайт повинен зберігати властивість image - зображення
-        self.image = transform.scale(image.load(player_image), (165, 65))
+        self.image = transform.scale(image.load(player_image), (100, 100))
         self.speed = player_speed
         # кожен спрайт повинен зберігати властивість rect - прямокутник, в який він вписаний
         self.rect = self.image.get_rect()
         self.rect.x = player_x
         self.rect.y = player_y
         # Jump Together!
-        self.jump_height = 10
+        self.jump_height = 15
         self.is_jumping = False
         self.jump_velocity = 0
     def reset2(self):
@@ -66,7 +66,15 @@ class Player(GameSprite):
         else:
             self.rect.y = walltexture.rect.top - self.rect.height + 1
 
-        
+        #if not sprite.collide_rect(self, walltexture2):
+        #    self.rect.y += self.speed 
+        #else:
+        #    self.rect.y = walltexture2.rect.top - self.rect.height + 1
+#
+        #if not sprite.collide_rect(self, walltexture5):
+        #    self.rect.y += self.speed 
+        #else:
+        #    self.rect.y = walltexture5.rect.top - self.rect.height + 1        
 # клас-спадкоємець для спрайта-ворога (переміщається сам)
 class Enemy(GameSprite):
     direction = "left"
@@ -115,9 +123,15 @@ background = transform.scale(image.load("forest.jpg"), (win_width, win_height))
 
 # Персонажі гри:
 player = Player('hero(i).png', 5, win_height - 80, 4)
-monster = Enemy('enemy.png', win_width - 80, 280, 2)
-final = GameSprite('caveportal.png', win_width - 120, win_height - 80, 0)
-walltexture = GameSprite2('ground.jpg', 50, win_height - 80, 0)
+monster = Enemy('New Piskel.png', win_width - 80, 280, 2)
+final = GameSprite('caveportal.png', win_width - 120, win_height - 140   , 0)
+walltexture = GameSprite2('ground.jpg', 0, win_height - 80, 0)
+walltexture2 = GameSprite2('ground.jpg', 100, win_height - 80, 0)
+voidl = GameSprite2('voidnessleft.png', 200, win_height - 100, 0)
+voidr = GameSprite2('voidnessright.png', 300, win_height - 100, 0)
+walltexture5 = GameSprite2('ground.jpg', 400, win_height - 80, 0)
+voidhostle = GameSprite2('voidness.png', 500, win_height - 100, 0)
+walltexture7 = GameSprite2('ground.jpg', 600, win_height - 80, 0)
 
 
 # Time Clock
@@ -150,6 +164,12 @@ while game:
         monster.reset()
         final.reset()
         walltexture.reset2()
+        walltexture2.reset2()
+        voidl.reset2()
+        voidr.reset2()
+        walltexture5.reset2()
+        voidhostle.reset2()
+        walltexture7.reset2()
 
 
     # Ситуація "Програш"
@@ -158,8 +178,12 @@ while game:
 
     # Ситуація "Перемога"
     if sprite.collide_rect(player, final):
-        finish = True
-        window.blit(win, (200, 200))
+        #finish = True
+        #window.blit(win, (200, 200))
+        background = transform.scale(image.load("cave.png"), (win_width, win_height))
+        window.blit(background, (0, 0))
+        walltexture = GameSprite2('ground.jpg', 0, win_height - 80, 0)
+        walltexture.reset2()
 
     display.update()
     clock.tick(FPS)
